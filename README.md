@@ -8,7 +8,7 @@ Plot famous fractal patterns from sets like [Mandelbrot](https://en.wikipedia.or
 [Julia](https://en.wikipedia.org/wiki/Julia\_set),
 [Burning ship](https://en.wikipedia.org/wiki/Burning\_Ship\_fractal).
 
-This is done by converting pixel coordinates into real numbers on the argand diagram,
+This is done by converting pixel coordinates into complex numbers on the argand diagram,
 and estimating which numbers can remain bounded following a certain sequence
 (which depends on the type of fractal) for infinity, but also color mapping the ones
 that almost get there because it looks pretty.
