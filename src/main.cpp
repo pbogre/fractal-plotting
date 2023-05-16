@@ -4,7 +4,6 @@
 using namespace std;
 
 // TODO
-// - fix zoom (inward center, outward shifted)
 // - make it run smoothly (async rendering) (try on windows)
 // 	- how tf was pezza getting 1800 fps
 // - better, smoother coloring
@@ -46,6 +45,8 @@ float iterate(sf::Vector2f z0, sf::Vector2f c, int max_iterations){
 // redesign palette, palette.hpp?
 // redesign index algorithm, use ratio iterations/max_iterations and assign color to some values 
 // e.g. 0, 0.05, 0.10, ..., 0.95, 1
+//
+// currently adds 8.5% frame time
 class PALETTE{
   const sf::Color colors[5] = {
     sf::Color (0, 0, 0),	// black
@@ -73,7 +74,7 @@ class PALETTE{
     //
     // base was chosen arbitrarily by experimentation
     PALETTE(int max_iterations){
-      const float base     = 2.5;
+      const float base     = 1.7;
       const float a1       = max_iterations * pow(base, -segments);
 
       for(int i = 0; i < segments; i++) ranges[i] = pow(base, i) * a1;
@@ -108,15 +109,15 @@ class PALETTE{
 
 
 int main(){ 
-    sf::RenderWindow window = sf::RenderWindow{ { 800, 800 }, "Mandelbrot Plotting" };
+    sf::RenderWindow window = sf::RenderWindow{ { 500, 500 }, "Mandelbrot Plotting" };
 
     const float half_width   = (float)window.getSize().x / 2;
     const float half_height  = (float)window.getSize().y / 2;
     const float window_ratio = (float)window.getSize().x / window.getSize().y;
     
-    const int max_iterations = 500;
+    const int max_iterations = 200;
 
-    float scale = 2;
+    float scale = 1;
     float x_shift = 0;
     float y_shift = 0;
 
@@ -154,10 +155,10 @@ int main(){
 	      if(event.key.code == sf::Keyboard::Left)  c.x -= 0.01;
 	      if(event.key.code == sf::Keyboard::Right) c.x += 0.01;
 
-	      if(event.key.code == sf::Keyboard::W)     y_shift -= 50;
-	      if(event.key.code == sf::Keyboard::S)     y_shift += 50;
-	      if(event.key.code == sf::Keyboard::D)     x_shift += 50;
-	      if(event.key.code == sf::Keyboard::A)     x_shift -= 50;
+	      if(event.key.code == sf::Keyboard::W)     y_shift -= scale / 3;
+	      if(event.key.code == sf::Keyboard::S)     y_shift += scale / 3;
+	      if(event.key.code == sf::Keyboard::D)     x_shift += scale / 3;
+	      if(event.key.code == sf::Keyboard::A)     x_shift -= scale / 3;
 
 	      if(event.key.code == sf::Keyboard::I)     scale *= 0.9;
 	      if(event.key.code == sf::Keyboard::O)     scale *= 1.1;
@@ -175,15 +176,15 @@ int main(){
 	    //i++;
 	    //cout << "\r" << i << " / " << window.getSize().x * window.getSize().y;
 
-	    const float px = (( (x + x_shift) - half_width ) * scale/ half_width);
-	    const float py = ((-(y + y_shift) + half_height) * scale/ half_height);
+	    const float px = ( x - half_width ) * 2 * scale / half_width  + x_shift;
+	    const float py = (-y + half_height) * 2 * scale / half_height - y_shift;
 
 	    //const float iterations = iterate(sf::Vector2f(px, py), c, max_iterations);
 	    const float iterations = iterate(sf::Vector2f(0, 0), sf::Vector2f(px, py), max_iterations);
 	    
 	    sf::Vertex vertex(sf::Vector2f(x, y));
-	    vertex.color = palette.get_color(palette.get_color_index(iterations, max_iterations));
-	    //vertex.color = sf::Color(255, 255, 255, 5 * iterations);
+	    //vertex.color = palette.get_color(palette.get_color_index(iterations, max_iterations));
+	    vertex.color = sf::Color(255, 255, 255, 5 * iterations);
 	    arr.append(vertex);
 	  }
 	}
